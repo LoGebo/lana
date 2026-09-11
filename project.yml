@@ -1,0 +1,56 @@
+name: Lana
+options:
+  bundleIdPrefix: com.geboou
+  developmentLanguage: es
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: ${DEVELOPMENT_TEAM}
+targets:
+  Lana:
+    type: application
+    platform: iOS
+    sources:
+      - path: Lana
+    dependencies:
+      - target: LanaWidget
+        embed: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.geboou.lana
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_ENTITLEMENTS: Entitlements/Lana.entitlements
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Lana
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        TARGETED_DEVICE_FAMILY: "1"
+        ENABLE_USER_SCRIPT_SANDBOXING: YES
+        MARKETING_VERSION: "1.1"
+        CURRENT_PROJECT_VERSION: "2"
+
+  LanaWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: LanaWidget
+      - path: Lana/Modelo
+    info:
+      path: LanaWidget/Info.plist
+      properties:
+        CFBundleDisplayName: Lana
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.geboou.lana.widget
+        CODE_SIGN_ENTITLEMENTS: Entitlements/LanaWidget.entitlements
+        GENERATE_INFOPLIST_FILE: NO
+        TARGETED_DEVICE_FAMILY: "1"
+        MARKETING_VERSION: "1.1"
+        CURRENT_PROJECT_VERSION: "2"
+        SKIP_INSTALL: YES

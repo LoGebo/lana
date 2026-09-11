@@ -1,0 +1,15 @@
+# Compilados
+build/
+buildsim/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+
+# Lo genera XcodeGen y trae el Team ID de quien compila
+Lana.xcodeproj/
+
+# El ícono es una foto personal, no va al repo.
+# Para tener uno: swift herramientas/generar-icono.swift
+Lana/Assets.xcassets/AppIcon.appiconset/icono.png
+
+.DS_Store
