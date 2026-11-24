@@ -78,6 +78,8 @@ private struct PanelProtocolos<Gasto: View>: View {
     @Query private var logs: [HabitoLog]
     @Query private var comidas: [ComidaLog]
     @Query private var aguas: [AguaLog]
+    @Query(sort: \NocheSueno.dia, order: .reverse) private var nochesGuardadas: [NocheSueno]
+    @AppStorage("protocolos.sueno.meta") private var metaSueno = 8.0
     @Query(sort: \SesionGym.inicio, order: .reverse) private var sesiones: [SesionGym]
     @AppStorage(LlavesMetas.kcal) private var metaKcal = 0.0
     @AppStorage(LlavesMetas.proteina) private var metaProteina = 0.0
@@ -204,7 +206,12 @@ private struct PanelProtocolos<Gasto: View>: View {
                 anillo(Double(hechos), Double(habitos.count), color: .purple, etiqueta: "hábitos", entero: true)
                 VStack(alignment: .leading, spacing: 6) {
                     Label("Acuéstate a las \(horaTexto(minutos: paso.dormir))", systemImage: "bed.double.fill").font(.subheadline)
-                    Text("Sueño: semana \(semanaSueno) de la rampa").font(.caption).foregroundStyle(.secondary)
+                    if let n = NocheSueno.mejorPorDia(nochesGuardadas).first {
+                        Label("Dormiste \(minutosTexto(n.minDormido)) · \(Int((n.eficiencia * 100).rounded())) % eficiencia", systemImage: "moon.zzz.fill")
+                            .font(.caption).foregroundStyle(n.horasDormidas >= metaSueno ? .green : .orange)
+                    } else {
+                        Text("Sueño: semana \(semanaSueno) de la rampa").font(.caption).foregroundStyle(.secondary)
+                    }
                     if hechos < habitos.count {
                         Text("Faltan: " + habitos.filter { h in !logs.contains { $0.dia == hoy && $0.clave == h.rawValue } }.prefix(2).map(\.nombre).joined(separator: ", "))
                             .font(.caption).foregroundStyle(.secondary).lineLimit(2)

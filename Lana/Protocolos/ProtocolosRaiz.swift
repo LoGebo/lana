@@ -30,6 +30,7 @@ private struct ContenidoProtocolos: View {
         Binding(get: { SeccionProtocolos(rawValue: seccionRaw) ?? .hoy }, set: { seccionRaw = $0.rawValue })
     }
     @StateObject private var salud = SaludService()
+    @Environment(\.scenePhase) private var escena
 
     var body: some View {
         VStack(spacing: 0) {
@@ -51,7 +52,8 @@ private struct ContenidoProtocolos: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             Biblioteca.sembrarSiHaceFalta(contexto)
-            await salud.cargar()
+            await salud.sincronizar(contexto)
         }
+        .onChange(of: escena) { _, nueva in if nueva == .active { Task { await salud.sincronizar(contexto) } } }
     }
 }

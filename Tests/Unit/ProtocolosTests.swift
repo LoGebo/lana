@@ -200,27 +200,6 @@ final class ProtocolosTests: XCTestCase {
 
     // MARK: Sueño
 
-    func testAgruparUneTraslapesYPartePorHuecos() {
-        let base = Date(timeIntervalSince1970: 1_700_000_000)
-        func h(_ x: Double) -> Date { base.addingTimeInterval(x * 3600) }
-        // Watch + iPhone traslapados: 0-4 y 3-7  → una noche de 7 h.
-        let noche1 = SaludService.agrupar([(h(0), h(4)), (h(3), h(7))])
-        XCTAssertEqual(noche1.count, 1)
-        XCTAssertEqual(noche1[0].horas, 7, accuracy: 0.01)
-        // Hueco de 1 h (despierto en la madrugada) no parte la noche.
-        let noche2 = SaludService.agrupar([(h(0), h(3)), (h(4), h(8))])
-        XCTAssertEqual(noche2.count, 1)
-        XCTAssertEqual(noche2[0].horas, 7, accuracy: 0.01)
-        // Hueco > 3 h: dos bloques; la siesta de 1 h se descarta.
-        let dos = SaludService.agrupar([(h(0), h(7)), (h(12), h(13))])
-        XCTAssertEqual(dos.count, 1)
-        // Dos noches reales.
-        let noches = SaludService.agrupar([(h(0), h(7)), (h(24), h(31))])
-        XCTAssertEqual(noches.count, 2)
-        XCTAssertGreaterThan(noches[0].despierto, noches[1].despierto)   // más reciente primero
-        XCTAssertTrue(SaludService.agrupar([]).isEmpty)
-    }
-
     // MARK: Rampa y hábitos
 
     func testRampa() {

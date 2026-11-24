@@ -8,6 +8,8 @@ struct HoyView: View {
     @AppStorage(Rampa.llaveSemana) private var semana = 1
     @ObservedObject var salud: SaludService
     @Query private var comidas: [ComidaLog]
+    @Query(sort: \NocheSueno.dia, order: .reverse) private var nochesGuardadas: [NocheSueno]
+    @AppStorage("protocolos.sueno.meta") private var metaSueno = 8.0
     @AppStorage(LlavesMetas.kcal) private var metaKcal: Double = 0
     @AppStorage(LlavesMetas.proteina) private var metaProteina: Double = 0
 
@@ -33,9 +35,12 @@ struct HoyView: View {
         let paso = Rampa.paso(semana)
         return VStack(alignment: .leading, spacing: 10) {
             Text("Anoche").font(.footnote.weight(.semibold)).foregroundStyle(.secondary)
-            if let n = salud.noches.first {
-                Text(String(format: "%.1f h", n.horas))
+            let todas = NocheSueno.mejorPorDia(nochesGuardadas)
+            if let n = todas.first {
+                Text(minutosTexto(n.minDormido))
                     .font(.system(size: 36, weight: .bold, design: .rounded))
+                Text("Puntaje \(AnalisisSueno.puntaje(de: n, entre: todas, metaHoras: metaSueno).total)/100 · eficiencia \(Int((n.eficiencia * 100).rounded())) %")
+                    .font(.caption).foregroundStyle(.secondary)
                 Text("Dormiste \(n.dormido.formatted(date: .omitted, time: .shortened)) → \(n.despierto.formatted(date: .omitted, time: .shortened))")
                     .font(.subheadline).foregroundStyle(.secondary)
             } else {
