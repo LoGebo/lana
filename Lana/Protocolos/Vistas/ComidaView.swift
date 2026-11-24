@@ -28,6 +28,7 @@ struct ComidaView: View {
                 selectorDia
                 tarjetaResumen
                 tarjetaAgua
+                TarjetaPeso()
                 ForEach(TiempoComida.allCases) { t in seccion(t) }
             }
             .padding(.horizontal)

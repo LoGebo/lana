@@ -20,7 +20,7 @@ final class HabitoLog {
 enum ContenedorProtocolos {
     static let compartido: ModelContainer = {
         let esquema = Schema([HabitoLog.self, EjercicioDef.self, Rutina.self, SesionGym.self, EjercicioLog.self, Serie.self,
-                               Alimento.self, ComidaLog.self, AguaLog.self])
+                               Alimento.self, ComidaLog.self, AguaLog.self, PesoLog.self])
         let config = ModelConfiguration("Protocolos", schema: esquema)
         do {
             return try ModelContainer(for: esquema, configurations: config)

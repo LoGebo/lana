@@ -325,10 +325,10 @@ struct MetasView: View {
 // MARK: - Menú meta (volumen limpio, comida barata de México)
 
 enum DietaMeta {
-    /// ~2850 kcal · ~205 g proteína · ~335 g carbs · ~75 g grasa. (nombre en Alimento, tiempo, porciones de la porción guardada)
+    /// ~2970 kcal · ~210 g proteína · ~365 g carbs · ~80 g grasa. (nombre en Alimento, tiempo, porciones de la porción guardada)
     static let menu: [(String, TiempoComida, Double)] = [
         ("Huevo entero", .desayuno, 4), ("Tortilla de maíz", .desayuno, 3), ("Plátano", .desayuno, 1), ("Leche entera", .desayuno, 1),
-        ("Pechuga de pollo cocida", .comida, 2), ("Arroz blanco cocido", .comida, 2.5), ("Frijoles cocidos", .comida, 1.5),
+        ("Pechuga de pollo cocida", .comida, 2), ("Arroz blanco cocido", .comida, 3.5), ("Frijoles cocidos", .comida, 1.5),
         ("Avena cruda", .snack, 0.6), ("Leche entera", .snack, 1), ("Plátano", .snack, 1),
         ("Pechuga de pollo cocida", .cena, 1.5), ("Tortilla de maíz", .cena, 4), ("Frijoles cocidos", .cena, 1), ("Crema de cacahuate", .cena, 2)]
 
@@ -336,8 +336,8 @@ enum DietaMeta {
     @MainActor @discardableResult
     static func cargar(dia: Date, _ contexto: ModelContext) -> Int {
         let d = UserDefaults.standard
-        d.set(2850.0, forKey: LlavesMetas.kcal); d.set(160.0, forKey: LlavesMetas.proteina)
-        d.set(380.0, forKey: LlavesMetas.carbs); d.set(75.0, forKey: LlavesMetas.grasa)
+        d.set(3000.0, forKey: LlavesMetas.kcal); d.set(160.0, forKey: LlavesMetas.proteina)
+        d.set(410.0, forKey: LlavesMetas.carbs); d.set(80.0, forKey: LlavesMetas.grasa)
         let alimentos = (try? contexto.fetch(FetchDescriptor<Alimento>())) ?? []
         var n = 0
         for (nombre, t, p) in menu {
