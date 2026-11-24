@@ -51,6 +51,10 @@ struct ContentView: View {
             Semillas.sembrarDemoSiSePide(contexto)
             Nomina.depositarPendientes(contexto)
             revisarCapturaPendiente()
+            await SincronizadorAgente.sincronizar(finanzas: contexto, protocolos: ContenedorProtocolos.compartido.mainContext)
+        }
+        .onChange(of: faseDeEscena) { _, f in
+            if f == .active { Task { await SincronizadorAgente.sincronizar(finanzas: contexto, protocolos: ContenedorProtocolos.compartido.mainContext) } }
         }
         .sheet(isPresented: $mostrandoCaptura) {
             EditorMovimientoView(fechaInicial: fechaCaptura)

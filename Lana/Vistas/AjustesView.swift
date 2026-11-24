@@ -60,6 +60,8 @@ struct AjustesView: View {
                     }
                 }
 
+                Section { NavigationLink { AjustesAgenteView() } label: { Label("Agente (MCP)", systemImage: "bolt.horizontal") } }
+
                 Section {
                     NavigationLink {
                         GuiaApplePayView()

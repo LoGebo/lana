@@ -14,3 +14,6 @@ Lana/Assets.xcassets/AppIcon.appiconset/icono.png
 
 .DS_Store
 buildsimB/
+mcp/node_modules/
+mcp/.wrangler/
+buildsimMCP/
