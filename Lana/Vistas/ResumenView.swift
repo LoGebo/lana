@@ -9,6 +9,7 @@ struct ResumenView: View {
     @Query(sort: \Categoria.orden) private var categorias: [Categoria]
 
     @Binding var mostrandoCaptura: Bool
+    @Binding var fechaCaptura: Date?
     @State private var mesVisible = Date()
     @State private var capturaRapida: Categoria?
     @State private var verTodasLasCategorias = false
@@ -49,7 +50,7 @@ struct ResumenView: View {
             .navigationTitle("Resumen")
             .overlay(alignment: .bottomTrailing) { botonAgregar }
             .sheet(item: $capturaRapida) { categoria in
-                EditorMovimientoView(categoriaInicial: categoria)
+                EditorMovimientoView(categoriaInicial: categoria, fechaInicial: esMesActual ? nil : primerDiaDelMesVisible)
             }
         }
     }
@@ -63,14 +64,19 @@ struct ResumenView: View {
             Text(nombreMes(mesVisible)).font(.headline)
             Spacer()
             Button { cambiarMes(1) } label: { Image(systemName: "chevron.right") }
-                .disabled(esMesActual)
-                .opacity(esMesActual ? 0.3 : 1)
         }
         .padding(.top, 4)
     }
 
     private var esMesActual: Bool {
         Calendar.current.isDate(mesVisible, equalTo: Date(), toGranularity: .month)
+    }
+
+    /// Si estás viendo diciembre, lo que captures cae en diciembre (día 1, mediodía).
+    private var primerDiaDelMesVisible: Date {
+        let c = Calendar.current
+        let inicio = c.date(from: c.dateComponents([.year, .month], from: mesVisible)) ?? mesVisible
+        return c.date(byAdding: .hour, value: 12, to: inicio) ?? inicio
     }
 
     private func cambiarMes(_ delta: Int) {
@@ -161,7 +167,7 @@ struct ResumenView: View {
                 miniDato("Balance", pesos(ingresoMes - gastoMes, decimales: false),
                          ingresoMes - gastoMes >= 0 ? .green : .red)
                 Divider().frame(height: 32)
-                miniDato("Patrimonio", pesosCortos(patrimonio), .primary)
+                miniDato("Patrimonio", pesos(patrimonio, decimales: false), .primary)
             }
         }
         .padding()
@@ -186,7 +192,7 @@ struct ResumenView: View {
     private func miniDato(_ titulo: String, _ valor: String, _ color: Color) -> some View {
         VStack(spacing: 2) {
             Text(titulo).font(.caption2).foregroundStyle(.secondary)
-            Text(valor).font(.subheadline.weight(.semibold)).foregroundStyle(color)
+            Text(valor).font(.subheadline.weight(.semibold)).foregroundStyle(color).lineLimit(1).minimumScaleFactor(0.6)
         }
         .frame(maxWidth: .infinity)
     }
@@ -356,6 +362,7 @@ struct ResumenView: View {
 
     private var botonAgregar: some View {
         Button {
+            fechaCaptura = esMesActual ? nil : primerDiaDelMesVisible
             mostrandoCaptura = true
         } label: {
             Image(systemName: "plus")

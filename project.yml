@@ -26,6 +26,7 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Entitlements/Lana.entitlements
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: Lana
+        INFOPLIST_KEY_NSHealthShareUsageDescription: "Lana lee tu sueño de Salud para armar tu rampa y reporte. No escribe nada."
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
         TARGETED_DEVICE_FAMILY: "1"
@@ -54,3 +55,30 @@ targets:
         MARKETING_VERSION: "1.1"
         CURRENT_PROJECT_VERSION: "2"
         SKIP_INSTALL: YES
+
+  LanaTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests/Unit
+    dependencies:
+      - target: Lana
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.geboou.lana.tests
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Lana.app/Lana
+        BUNDLE_LOADER: $(TEST_HOST)
+
+  LanaUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: Tests/UI
+    dependencies:
+      - target: Lana
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.geboou.lana.uitests
+        TEST_TARGET_NAME: Lana

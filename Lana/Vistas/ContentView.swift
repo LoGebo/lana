@@ -5,18 +5,27 @@ import AppIntents
 struct ContentView: View {
     @Environment(\.modelContext) private var contexto
     @Environment(\.scenePhase) private var faseDeEscena
-    @State private var pestaña = 0
+    @State private var pestaña = 6
     @State private var mostrandoCaptura = false
+    @State private var fechaCaptura: Date?
 
     var body: some View {
         TabView(selection: $pestaña) {
-            ResumenView(mostrandoCaptura: $mostrandoCaptura)
+            PanelView(irA: { pestaña = $0 }, capturar: { fechaCaptura = nil; mostrandoCaptura = true })
+                .tabItem { Label("Panel", systemImage: "square.grid.2x2.fill") }
+                .tag(6)
+
+            ResumenView(mostrandoCaptura: $mostrandoCaptura, fechaCaptura: $fechaCaptura)
                 .tabItem { Label("Resumen", systemImage: "chart.pie.fill") }
                 .tag(0)
 
             MovimientosView(mostrandoCaptura: $mostrandoCaptura)
                 .tabItem { Label("Movimientos", systemImage: "list.bullet") }
                 .tag(1)
+
+            ProtocolosRaiz()
+                .tabItem { Label("Protocolos", systemImage: "checklist") }
+                .tag(5)
 
             CuentasView()
                 .tabItem { Label("Cuentas", systemImage: "wallet.bifold.fill") }
@@ -29,6 +38,7 @@ struct ContentView: View {
             AjustesView()
                 .tabItem { Label("Ajustes", systemImage: "gearshape.fill") }
                 .tag(4)
+
         }
         .tint(.green)
         .task {
@@ -36,14 +46,16 @@ struct ContentView: View {
             Semillas.aplicarColoresDeMarca(contexto)
             Semillas.asegurarCategorias(contexto)
             Semillas.separarTarjetaNu(contexto)
+            Semillas.aplicarPersonalizacion(contexto)
             AtajosLana.updateAppShortcutParameters()
             Semillas.sembrarDemoSiSePide(contexto)
             Nomina.depositarPendientes(contexto)
             revisarCapturaPendiente()
         }
         .sheet(isPresented: $mostrandoCaptura) {
-            EditorMovimientoView()
+            EditorMovimientoView(fechaInicial: fechaCaptura)
         }
+        .onChange(of: mostrandoCaptura) { _, abierta in if !abierta { fechaCaptura = nil } }
         .onReceive(NotificationCenter.default.publisher(for: Señales.abrirCaptura)) { _ in
             mostrandoCaptura = true
         }
