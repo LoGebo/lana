@@ -100,3 +100,10 @@ Para ver la app llena sin capturar nada: en Xcode, Edit Scheme → Run → Argum
   pon tu versión y márcala con `git update-index --skip-worktree Lana/Modelo/SemillasPersonales.swift`.
 - `Lana/Protocolos/Modelo/ProgramaBTS.swift`: el programa de entrenamiento de pago (Jeff Nippard) no se publica.
   Con el stub el módulo de programa queda vacío y las pruebas que lo necesitan se saltan.
+
+## Apple Watch
+
+`LanaWatch/` es la app del reloj (se instala sola con la del iPhone). Pantallas: Hoy (anillos de kcal/proteína, agua, rutina de hoy, sueño), Gym (serie con la corona, descanso con háptico, FC en vivo y guarda el entrenamiento en Salud), Gasto y Peso.
+Comparte con el iPhone `Shared/WatchComun.swift`: comandos con id único que el iPhone aplica una sola vez (`AplicadorAgente`, gastos marcados `[watch]`) y una cola offline en el reloj. El iPhone solo agrega desde el reloj: el "−" del agua deshace únicamente lo que aún no se envió.
+
+Para instalarla en tu reloj: Apple Watch emparejado y desbloqueado, Modo desarrollador activo en el reloj (Ajustes → Privacidad y seguridad), `./instalar.sh`, y en la app Watch del iPhone activa "Instalar" junto a Lana. La primera vez confía en tu perfil de desarrollador también en el reloj y acepta los permisos de Salud.

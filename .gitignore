@@ -17,3 +17,5 @@ buildsimB/
 mcp/node_modules/
 mcp/.wrangler/
 buildsimMCP/
+buildsimWatch/
+buildsimMCP/

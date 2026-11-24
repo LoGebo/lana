@@ -34,7 +34,8 @@ enum AplicadorAgente {
             guard let cuenta = Preferencias.cuentaInicial(entre: cuentas) else { return .rechazado("no hay cuentas") }
             let cats = (try? finanzas.fetch(FetchDescriptor<Categoria>())) ?? []
             let cat = txt("category", 40).flatMap { n in cats.first { $0.nombre.localizedCaseInsensitiveCompare(n) == .orderedSame } }
-            let nota = ["[agente]", txt("note", 120)].compactMap { $0 }.joined(separator: " ")
+            let origen = (a["source"] as? String) == "watch" ? "watch" : "agente"
+            let nota = ["[\(origen)]", txt("note", 120)].compactMap { $0 }.joined(separator: " ")
             finanzas.insert(Movimiento(monto: m, fecha: fecha, tipo: .gasto, comercio: txt("merchant", 60) ?? "", nota: nota,
                                        cuenta: cuenta, categoria: cat, creadoPorAtajo: true))
             try? finanzas.save()
