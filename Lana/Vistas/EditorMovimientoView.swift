@@ -14,6 +14,8 @@ struct EditorMovimientoView: View {
     var movimiento: Movimiento?
     /// Categoría preseleccionada cuando entras desde el registro rápido.
     var categoriaInicial: Categoria?
+    /// Para capturar en otro mes (p. ej. diciembre) sin mover la fecha a mano.
+    var fechaInicial: Date?
 
     @State private var centavos = ""
     @State private var tipo: TipoMovimiento = .gasto
@@ -294,6 +296,7 @@ struct EditorMovimientoView: View {
             fecha = m.fecha
         } else {
             if let inicial = categoriaInicial { categoriaSel = inicial }
+            if let f = fechaInicial { fecha = f }
             cuentaSel = Preferencias.cuentaInicial(entre: cuentas)
         }
     }

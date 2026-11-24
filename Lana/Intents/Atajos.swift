@@ -1,6 +1,7 @@
 import AppIntents
 import SwiftData
 import Foundation
+import WidgetKit
 
 // MARK: - Categoría como entidad (para poder decirla en la frase de Siri)
 
@@ -135,6 +136,57 @@ struct RegistrarGastoIntent: AppIntent {
 
         let detalle = elegida.map { " en \($0.nombre)" } ?? (donde.isEmpty ? "" : " en \(donde)")
         return .result(dialog: IntentDialog("Listo, anoté \(pesos(monto, decimales: false))\(detalle)."))
+    }
+}
+
+// MARK: - Apple Pay (automatización "Transacción" de Atajos)
+
+struct RegistrarApplePayIntent: AppIntent {
+    static var title: LocalizedStringResource = "Registrar compra de Apple Pay"
+    static var description = IntentDescription("Guarda la compra de Wallet con su categoría, sin abrir la app. Úsala en la automatización Transacción de Atajos.")
+    static var openAppWhenRun: Bool = false
+
+    // Texto, no número: Atajos manda el monto como "$189.00" o "1,234.50".
+    @Parameter(title: "Monto")
+    var monto: String
+
+    @Parameter(title: "Comercio", default: "")
+    var comercio: String
+
+    @Parameter(title: "Tarjeta", default: "")
+    var tarjeta: String
+
+    static var parameterSummary: some ParameterSummary {
+        Summary("Registrar \(\.$monto) en \(\.$comercio) con \(\.$tarjeta)")
+    }
+
+    @MainActor
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        let limpio = monto.filter { $0.isNumber || $0 == "." }
+        guard let importe = Double(limpio), importe > 0 else {
+            return .result(dialog: IntentDialog("No entendí el monto."))
+        }
+        let contexto = ContenedorLana.compartido.mainContext
+        let categorias = (try? contexto.fetch(FetchDescriptor<Categoria>())) ?? []
+        let cuentas = (try? contexto.fetch(FetchDescriptor<Cuenta>())) ?? []
+
+        let donde = comercio.trimmingCharacters(in: .whitespaces)
+        let categoria = donde.isEmpty ? nil : Adivinador.buscar(donde, en: categorias)
+
+        // La tarjeta de Wallet ("HSBC Visa", "Nu") → débito/crédito/efectivo que se llame parecido.
+        // Nunca una inversión (Cajita, Mercado Pago...): de ahí no se paga con tarjeta.
+        let pagables = cuentas.filter { $0.activa && $0.tipo != .inversion }
+        let cuenta = pagables.first {
+            let primera = $0.nombre.split(separator: " ").first.map(String.init) ?? $0.nombre
+            return !tarjeta.isEmpty && (tarjeta.localizedCaseInsensitiveContains($0.nombre)
+                || tarjeta.localizedCaseInsensitiveContains(primera))
+        } ?? Preferencias.cuentaInicial(entre: pagables)
+
+        contexto.insert(Movimiento(monto: importe, tipo: .gasto, comercio: donde,
+                                   cuenta: cuenta, categoria: categoria, creadoPorAtajo: true))
+        try? contexto.save()
+        WidgetCenter.shared.reloadAllTimelines()
+        return .result(dialog: IntentDialog("Anotado \(pesos(importe)) en \(categoria?.nombre ?? "sin categoría")."))
     }
 }
 

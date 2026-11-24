@@ -82,6 +82,17 @@ struct AjustesView: View {
                 }
 
                 Section {
+                    ShareLink(
+                        item: resumenParaIA(),
+                        preview: SharePreview("Gastos por categoría")
+                    ) {
+                        Label("Exportar para una IA", systemImage: "sparkles")
+                    }
+                } footer: {
+                    Text("Texto con tus cuentas, gastos por categoría de cada mes y todos los movimientos. Pégalo en ChatGPT o Claude y pídele que te administre.")
+                }
+
+                Section {
                     LabeledContent("Versión", value: "1.0")
                     LabeledContent("Datos", value: "Solo en este iPhone")
                 } footer: {
@@ -93,6 +104,37 @@ struct AjustesView: View {
                 NavigationStack { EditorCategoriaView() }
             }
         }
+    }
+
+    private func resumenParaIA() -> String {
+        let formatoMes = DateFormatter()
+        formatoMes.dateFormat = "yyyy-MM"
+        let formatoDia = DateFormatter()
+        formatoDia.dateFormat = "yyyy-MM-dd"
+
+        var t = "# Mis finanzas (MXN)\nAdministra mis finanzas: detecta fugas, propón presupuesto por categoría y metas de ahorro.\n\n## Cuentas (saldo hoy)\n"
+        for c in cuentas.filter(\.activa) {
+            let saldo = Finanzas.saldo(de: c, movimientos: movimientos)
+            t += "- \(c.nombre) [\(c.tipo.nombre)]: \(String(format: "%.2f", saldo))"
+            if c.rendimientoAnual > 0 { t += " (rinde \(c.rendimientoAnual)% anual)" }
+            t += "\n"
+        }
+        t += "- PATRIMONIO: \(String(format: "%.2f", Finanzas.patrimonio(cuentas: cuentas, movimientos: movimientos)))\n"
+
+        let porMes = Dictionary(grouping: movimientos) { formatoMes.string(from: $0.fecha) }
+        for mes in porMes.keys.sorted() {
+            let ms = porMes[mes] ?? []
+            t += "\n## \(mes)\nIngresos: \(String(format: "%.2f", Finanzas.totalIngresos(ms))) · Gastos: \(String(format: "%.2f", Finanzas.totalGastos(ms)))\nGastos por categoría:\n"
+            for g in Finanzas.gastosPorCategoria(ms) {
+                t += "- \(g.nombre): \(String(format: "%.2f", g.total))\n"
+            }
+        }
+
+        t += "\n## Movimientos (fecha, tipo, monto, categoría, cuenta, comercio)\n"
+        for m in movimientos.sorted(by: { $0.fecha < $1.fecha }) {
+            t += "\(formatoDia.string(from: m.fecha)), \(m.tipo.rawValue), \(String(format: "%.2f", m.monto)), \(m.categoria?.nombre ?? "sin categoría"), \(m.cuenta?.nombre ?? ""), \(m.comercio)\n"
+        }
+        return t
     }
 
     private func generarCSV() -> String {
@@ -270,8 +312,9 @@ struct GuiaApplePayView: View {
                 paso(2, "Toca +, elige Transacción.")
                 paso(3, "Escoge la tarjeta de Wallet que más usas (o Cualquier tarjeta).")
                 paso(4, "Elige Ejecutar inmediatamente y dale Siguiente.")
-                paso(5, "Busca la acción Abrir captura rápida de Lana y agrégala.")
-                paso(6, "Cada vez que pagues con el iPhone se te abre Lana en la captura.")
+                paso(5, "Busca la acción Registrar compra de Apple Pay (de Lana) y agrégala.")
+                paso(6, "Toca cada campo y elige la variable: Monto → Monto, Comercio → Comercio, Tarjeta → Tarjeta o pase (de Entrada de atajo).")
+                paso(7, "Listo: cada pago se anota solo, con categoría adivinada por el comercio y sin abrir la app. Si el comercio no se reconoce queda sin categoría para que la revises en Movimientos.")
             }
 
             Section("Opción 5 · Widget") {

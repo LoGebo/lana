@@ -7,7 +7,31 @@ import SwiftData
 /// la mitad del ingreso mensual a la cuenta que escojas. Se revisa cada vez
 /// que abres la app, así que si no la abriste el día 15, al abrirla se pone
 /// al corriente con la fecha correcta.
+/// Un ingreso recurrente: cuánto cae cada quincena y a qué cuenta.
+struct FuenteIngreso: Codable, Identifiable {
+    var id = UUID()
+    var nombre: String
+    /// Por quincena (se deposita el 15 y el 30).
+    var monto: Double
+    var cuentaID: UUID?
+}
+
 enum Nomina {
+    static let llaveFuentes = "lana.fuentesIngreso"
+
+    static var fuentes: [FuenteIngreso] {
+        get {
+            guard let d = Señales.defaults.data(forKey: llaveFuentes),
+                  let f = try? JSONDecoder().decode([FuenteIngreso].self, from: d) else { return [] }
+            return f
+        }
+        set {
+            Señales.defaults.set(try? JSONEncoder().encode(newValue), forKey: llaveFuentes)
+            // El presupuesto y el widget leen el ingreso mensual de aquí.
+            Señales.defaults.set(newValue.reduce(0) { $0 + $1.monto } * 2, forKey: llaveIngreso)
+        }
+    }
+
     static let llaveActiva = "lana.quincena.activa"
     static let llaveCuenta = "lana.quincena.cuenta"
     static let llaveDesde = "lana.quincena.desde"
@@ -92,7 +116,7 @@ enum Nomina {
     @MainActor
     @discardableResult
     static func depositarPendientes(_ contexto: ModelContext) -> Int {
-        guard activa, quincena > 0 else { return 0 }
+        guard activa, !fuentes.isEmpty else { return 0 }
 
         // No rellenamos más de 3 meses hacia atrás.
         let piso = Calendar.current.date(byAdding: .month, value: -3, to: Date()) ?? desde
@@ -105,28 +129,25 @@ enum Nomina {
         let categorias = (try? contexto.fetch(FetchDescriptor<Categoria>())) ?? []
         let movimientos = (try? contexto.fetch(FetchDescriptor<Movimiento>())) ?? []
 
-        let destino = cuenta(entre: cuentas)
         let sueldo = categorias.first { $0.esIngreso && $0.nombre == "Sueldo" }
             ?? categorias.first { $0.esIngreso }
 
         let calendario = Calendar.current
         var creados = 0
-        for fecha in fechas {
-            let yaExiste = movimientos.contains {
-                $0.nota == marca && calendario.isDate($0.fecha, inSameDayAs: fecha)
+        for fuente in fuentes where fuente.monto > 0 {
+            let destino = cuentas.first { $0.id == fuente.cuentaID } ?? cuenta(entre: cuentas)
+            let nota = "\(marca) · \(fuente.nombre)"
+            for fecha in fechas {
+                let yaExiste = movimientos.contains {
+                    $0.nota == nota && calendario.isDate($0.fecha, inSameDayAs: fecha)
+                }
+                guard !yaExiste else { continue }
+                contexto.insert(Movimiento(
+                    monto: fuente.monto, fecha: fecha, tipo: .ingreso,
+                    comercio: fuente.nombre, nota: nota, cuenta: destino, categoria: sueldo
+                ))
+                creados += 1
             }
-            guard !yaExiste else { continue }
-
-            contexto.insert(Movimiento(
-                monto: quincena,
-                fecha: fecha,
-                tipo: .ingreso,
-                comercio: "Quincena",
-                nota: marca,
-                cuenta: destino,
-                categoria: sueldo
-            ))
-            creados += 1
         }
 
         desde = Date()

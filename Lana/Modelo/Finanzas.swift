@@ -6,7 +6,7 @@ enum Finanzas {
     // MARK: - Saldos
 
     /// Cuánto mueve un movimiento en esta cuenta (+ entra, − sale).
-    private static func efecto(de m: Movimiento, en cuenta: Cuenta) -> Double {
+    static func efecto(de m: Movimiento, en cuenta: Cuenta) -> Double {
         var delta = 0.0
         if m.cuenta?.id == cuenta.id {
             switch m.tipo {
@@ -21,8 +21,11 @@ enum Finanzas {
     }
 
     /// Saldo sin contar rendimientos: lo que tenías ± lo que registraste.
+    /// Los movimientos con fecha futura (p. ej. gastos ya capturados de diciembre) no cuentan hasta que llegue su día.
     static func saldoBase(de cuenta: Cuenta, movimientos: [Movimiento]) -> Double {
-        movimientos.reduce(cuenta.saldoInicial) { $0 + efecto(de: $1, en: cuenta) }
+        let finDeHoy = Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: Date())) ?? Date()
+        return movimientos.filter { $0.fecha < finDeHoy }
+            .reduce(cuenta.saldoInicial) { $0 + efecto(de: $1, en: cuenta) }
     }
 
     /// Saldo real al día de hoy, con el rendimiento que se ha ido generando.

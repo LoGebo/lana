@@ -16,6 +16,7 @@ struct PresupuestoView: View {
     private var metaAhorro: Double = 0
 
     @State private var quincenaActiva = Nomina.activa
+    @State private var fuentes = Nomina.fuentes
     @State private var creandoCategoria = false
 
     // MARK: - Números
@@ -95,7 +96,7 @@ struct PresupuestoView: View {
                 Text("💼 Sueldo / ingresos")
                     .font(.subheadline)
                 Spacer()
-                CampoMonto(valor: $ingresoMensual, ancho: 120)
+                Text(pesos(ingresoMensual, decimales: false))
                     .font(.subheadline.weight(.semibold))
             }
 
@@ -149,30 +150,30 @@ struct PresupuestoView: View {
             if quincenaActiva {
                 Divider()
 
-                if ingresoMensual <= 0 {
-                    Text("Pon arriba tu sueldo mensual para saber de cuánto es cada quincena.")
-                        .font(.caption).foregroundStyle(.orange)
-                } else {
-                    HStack {
-                        Text("Cada quincena").font(.subheadline)
-                        Spacer()
-                        Text("+" + pesos(ingresoMensual / 2, decimales: false))
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(.green)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.6)
+                ForEach($fuentes) { $f in
+                    VStack(spacing: 6) {
+                        HStack {
+                            TextField("Nombre", text: $f.nombre).font(.subheadline.weight(.medium))
+                            CampoMonto(valor: $f.monto, ancho: 100).font(.subheadline.weight(.semibold))
+                            Button(role: .destructive) { fuentes.removeAll { $0.id == f.id } } label: {
+                                Image(systemName: "trash").font(.caption)
+                            }
+                            .buttonStyle(.borderless)
+                        }
+                        Picker("Cae en", selection: $f.cuentaID) {
+                            Text("Cuenta por defecto").tag(nil as UUID?)
+                            ForEach(cuentas.filter(\.activa)) { c in Text(c.nombre).tag(c.id as UUID?) }
+                        }
+                        .font(.caption)
                     }
                 }
 
-                Picker("Entra a", selection: Binding(
-                    get: { cuentaQuincena?.id ?? UUID() },
-                    set: { nuevo in Nomina.cuentaID = nuevo }
-                )) {
-                    ForEach(cuentas.filter(\.activa)) { c in
-                        Text(c.nombre).tag(c.id)
-                    }
-                }
-                .font(.subheadline)
+                Button {
+                    fuentes.append(FuenteIngreso(nombre: "Nuevo ingreso", monto: 0, cuentaID: cuentaQuincena?.id))
+                } label: { Label("Agregar ingreso", systemImage: "plus.circle").font(.subheadline) }
+
+                Text("Cada monto es por quincena. Al mes: \(pesos(fuentes.reduce(0) { $0 + $1.monto } * 2, decimales: false)).")
+                    .font(.caption).foregroundStyle(.secondary)
 
                 if let proxima = Nomina.siguientePago() {
                     Text("Próximo depósito: \(fechaCorta(proxima)). Si ese día no abres la app, se registra con su fecha correcta cuando la abras.")
@@ -183,6 +184,12 @@ struct PresupuestoView: View {
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18))
+        .onChange(of: fuentes.map { "\($0.nombre)|\($0.monto)|\($0.cuentaID?.uuidString ?? "")" }) { _, _ in guardarFuentes() }
+    }
+
+    private func guardarFuentes() {
+        Nomina.fuentes = fuentes
+        ingresoMensual = fuentes.reduce(0) { $0 + $1.monto } * 2
     }
 
     private var cuentaQuincena: Cuenta? { Nomina.cuenta(entre: cuentas) }
