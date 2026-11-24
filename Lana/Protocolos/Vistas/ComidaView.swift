@@ -65,7 +65,11 @@ struct ComidaView: View {
                         .foregroundStyle(metaKcal > 0 && totales.kcal > metaKcal ? .red : .primary)
                 }
                 Spacer()
-                Button { metas = true } label: { Label("Metas", systemImage: "target").font(.subheadline) }
+                VStack(alignment: .trailing, spacing: 8) {
+                    Button { metas = true } label: { Label("Metas", systemImage: "target").font(.subheadline) }
+                    Button { DietaMeta.cargar(dia: dia, contexto) } label: { Label("Menú meta", systemImage: "fork.knife").font(.subheadline) }
+                        .accessibilityLabel("Cargar menú meta del día")
+                }
             }
             if metaKcal > 0 {
                 Text("\(Int(metaKcal)) meta − \(Int(totales.kcal)) comidas")

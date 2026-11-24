@@ -148,6 +148,16 @@ struct GymView: View {
         return max(5, Int((seg / 60 / 5).rounded()) * 5)
     }
 
+    /// Con programa activo: en orden de la semana (Lun→Sáb, extra al final), luego las demás.
+    private var rutinasOrdenadas: [Rutina] {
+        let orden = ["Lun", "Mar", "Jue", "Vie", "Sáb", "Extra"]
+        return rutinas.enumerated().sorted { a, b in
+            let ia = Programa.diaDe(a.element.nombre).flatMap(orden.firstIndex(of:)) ?? 99
+            let ib = Programa.diaDe(b.element.nombre).flatMap(orden.firstIndex(of:)) ?? 99
+            return (ia, a.offset) < (ib, b.offset)
+        }.map(\.element)
+    }
+
     private var tarjetaRutinas: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
@@ -156,9 +166,12 @@ struct GymView: View {
                 Button { creando = true } label: { Image(systemName: "plus.circle.fill").font(.title3) }
                     .accessibilityLabel("Nueva rutina")
             }
-            ForEach(rutinas) { r in
+            ForEach(rutinasOrdenadas) { r in
                 HStack(spacing: 10) {
                     VStack(alignment: .leading, spacing: 3) {
+                        if let d = Programa.diaDe(r.nombre) {
+                            Text(d.uppercased()).font(.caption2.weight(.bold)).foregroundStyle(.secondary)
+                        }
                         Text(r.nombre).font(.subheadline.weight(.semibold))
                         Text("\(r.ejercicios.count) ejercicios · ~\(minutos(r)) min")
                             .font(.caption.weight(.medium)).foregroundStyle(.green)
@@ -180,7 +193,7 @@ struct GymView: View {
                     .accessibilityLabel("Más opciones de \(r.nombre)")
                 }
                 .padding(.vertical, 4)
-                if r.id != rutinas.last?.id { Divider() }
+                if r.id != rutinasOrdenadas.last?.id { Divider() }
             }
         }
         .padding()

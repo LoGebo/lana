@@ -22,6 +22,12 @@ extension Programa {
         return [2: "Torso A", 3: "Pierna A", 5: "Torso B", 6: "Pierna B"][d]
     }
 
+    /// Día de la semana (Calendar weekday) en que toca cada rutina del programa; nil si no es del programa.
+    static func diaDe(_ rutina: String) -> String? {
+        ["BTS Upper": "Lun", "BTS Lower": "Mar", "BTS Pull": "Jue", "BTS Push": "Vie", "BTS Legs": "Sáb"][rutina]
+            ?? (rutina.hasPrefix("BTS Brazos") ? "Extra" : nil)
+    }
+
     static func fase(de semana: Int) -> ProgFase? { fases.first { $0.desde <= semana && semana <= $0.hasta } }
 
     static func calentamiento(_ n: String) -> String {
@@ -110,7 +116,7 @@ extension Programa {
     /// Si la semana guardada cambió o las rutinas no existen, las regenera.
     @MainActor static func sincronizar(_ contexto: ModelContext) {
         // Listo de fábrica: si nunca lo iniciaste, arranca en la semana 1 (se cambia con el selector).
-        if semana == 0 && UserDefaults.standard.double(forKey: llaveInicio) == 0 { aplicar(semana: 1, contexto); return }
+        if semana == 0 && UserDefaults.standard.double(forKey: llaveInicio) == 0 && !UserDefaults.standard.bool(forKey: llave + ".sin") { aplicar(semana: 1, contexto); return }
         guard let s = semanaPorFecha() ?? (semana > 0 ? semana : nil),
               UserDefaults.standard.integer(forKey: llave + ".aplicada") != s else { return }
         aplicar(semana: s, fijarInicio: false, contexto)
@@ -127,7 +133,7 @@ struct TarjetaPrograma: View {
             if semana == 0 {
                 Text("12 semanas, 5 días (Upper, Lower, Pull, Push, Legs) con RPE, video y alternativas por ejercicio.")
                     .font(.caption).foregroundStyle(.secondary)
-                Button("Empezar semana 1") { Programa.aplicar(semana: 1, contexto) }
+                Button("Empezar semana 1") { UserDefaults.standard.set(false, forKey: Programa.llave + ".sin"); Programa.aplicar(semana: 1, contexto) }
                     .buttonStyle(.borderedProminent).tint(.green)
             } else {
                 HStack {
@@ -139,6 +145,11 @@ struct TarjetaPrograma: View {
                     Stepper("Semana", value: Binding(get: { semana }, set: { Programa.aplicar(semana: $0, contexto) }), in: 1...12)
                         .labelsHidden()
                 }
+                Button("Terminar programa y usar rutinas propias", role: .destructive) {
+                    UserDefaults.standard.set(true, forKey: Programa.llave + ".sin")
+                    UserDefaults.standard.set(0, forKey: Programa.llave)
+                    UserDefaults.standard.set(0.0, forKey: Programa.llaveInicio)
+                }.font(.caption)
                 Text("Lun Upper · Mar Lower · Jue Pull · Vie Push · Sáb Legs. Última serie al fallo desde la semana 2. El día de brazos es un extra opcional mío (no es de Nippard).")
                     .font(.caption2).foregroundStyle(.secondary)
             }

@@ -321,3 +321,32 @@ struct MetasView: View {
         carbs = max(0, ((total - proteina * 4 - grasa * 9) / 4).rounded())
     }
 }
+
+// MARK: - Menú meta (volumen limpio, comida barata de México)
+
+enum DietaMeta {
+    /// ~2850 kcal · ~205 g proteína · ~335 g carbs · ~75 g grasa. (nombre en Alimento, tiempo, porciones de la porción guardada)
+    static let menu: [(String, TiempoComida, Double)] = [
+        ("Huevo entero", .desayuno, 4), ("Tortilla de maíz", .desayuno, 3), ("Plátano", .desayuno, 1), ("Leche entera", .desayuno, 1),
+        ("Pechuga de pollo cocida", .comida, 2), ("Arroz blanco cocido", .comida, 2.5), ("Frijoles cocidos", .comida, 1.5),
+        ("Avena cruda", .snack, 0.6), ("Leche entera", .snack, 1), ("Plátano", .snack, 1),
+        ("Pechuga de pollo cocida", .cena, 1.5), ("Tortilla de maíz", .cena, 4), ("Frijoles cocidos", .cena, 1), ("Crema de cacahuate", .cena, 2)]
+
+    /// Pone las metas diarias y agrega el menú al día. Devuelve cuántos renglones agregó.
+    @MainActor @discardableResult
+    static func cargar(dia: Date, _ contexto: ModelContext) -> Int {
+        let d = UserDefaults.standard
+        d.set(2850.0, forKey: LlavesMetas.kcal); d.set(160.0, forKey: LlavesMetas.proteina)
+        d.set(380.0, forKey: LlavesMetas.carbs); d.set(75.0, forKey: LlavesMetas.grasa)
+        let alimentos = (try? contexto.fetch(FetchDescriptor<Alimento>())) ?? []
+        var n = 0
+        for (nombre, t, p) in menu {
+            guard let a = alimentos.first(where: { $0.nombre == nombre }) else { continue }
+            contexto.insert(ComidaLog(dia: dia, tiempo: t, nombre: a.nombre, porcionTexto: a.porcion, porciones: p,
+                                      kcal: a.kcal, proteina: a.proteina, carbs: a.carbs, grasa: a.grasa))
+            n += 1
+        }
+        try? contexto.save()
+        return n
+    }
+}
