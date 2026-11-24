@@ -237,7 +237,7 @@ final class ProtocolosTests: XCTestCase {
 
     func testGymSoloLMJV() {
         var cal = Calendar(identifier: .gregorian)
-        cal.timeZone = TimeZone(identifier: "America/Monterrey")!
+        cal.timeZone = TimeZone(identifier: "America/Mexico_City")!
         // 2026-11-23 es lunes
         let lunes = cal.date(from: DateComponents(year: 2026, month: 11, day: 23, hour: 12))!
         for (offset, aplica) in [(0, true), (1, true), (2, false), (3, true), (4, true), (5, false), (6, false)] {

@@ -53,7 +53,7 @@ BMR = 750 + 1112.5 - 125 + 5 = 1742; TDEE (1.5) = 2613; meta = 2613+300 = ~2910 
 | Cafeina | 3-6 mg/kg (~200-400 mg) | 30-60 min antes de entrenar; no despues de ~8 h antes de dormir | Alta para rendimiento (ISSN 2021). Resumenes secundarios citan 3-8 mg/kg; no pude confirmar dosis en la posicion original. Anhidra > cafe |
 | Whey | 25-40 g | cuando falte proteina; post-entreno cómodo | Alta como alimento, no mágico: solo cubre el total diario |
 | Omega-3 | 1-2 g EPA+DHA/dia solo si comes poco pescado | con comida | Baja-media para musculo; util para salud general [C] |
-| Vitamina D | segun nivel sanguineo (tipicamente 1000-2000 UI) | con comida con grasa | Solo si deficiente; en Monterrey con sol es frecuente estar suficiente: medir 25-OH-D antes [C] |
+| Vitamina D | segun nivel sanguineo (tipicamente 1000-2000 UI) | con comida con grasa | Solo si deficiente; en tu ciudad con sol es frecuente estar suficiente: medir 25-OH-D antes [C] |
 | Magnesio/ fibra / multivitaminico | opcional | | Baja; solo cubrir deficiencia dietaria |
 - NO vale la pena (o evidencia debil): BCAA (si ya cubres proteina), glutamina, testosterone boosters (tribulus, DAA, ZMA, ashwagandha para musculo), arginina/oxido nitrico, HMB en entrenados, quemadores de grasa, carb-cycling para ganar musculo, "anabolicos" naturales, colageno para hipertrofia. [C, sin fuente verificada en esta sesion]
 - Citrulina malato y beta-alanina: efecto pequeno en rendimiento/reps; opcional, no es prioridad.
