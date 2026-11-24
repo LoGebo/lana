@@ -350,3 +350,58 @@ enum DietaMeta {
         return n
     }
 }
+
+struct MenuMetaView: View {
+    @Environment(\.dismiss) private var cerrar
+    @Environment(\.modelContext) private var contexto
+    @Query private var alimentos: [Alimento]
+    let dia: Date
+    let yaHayComidas: Bool
+
+    private func a(_ n: String) -> Alimento? { alimentos.first { $0.nombre == n } }
+    private func macros(_ items: [(String, TiempoComida, Double)]) -> (k: Double, p: Double, c: Double, g: Double) {
+        items.reduce((0, 0, 0, 0)) { r, i in
+            guard let x = a(i.0) else { return r }
+            return (r.0 + x.kcal * i.2, r.1 + x.proteina * i.2, r.2 + x.carbs * i.2, r.3 + x.grasa * i.2)
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                let t = macros(DietaMeta.menu)
+                Section {
+                    HStack { Spacer()
+                        VStack { Text("\(Int(t.k))").font(.system(size: 38, weight: .bold, design: .rounded)); Text("kcal").font(.caption).foregroundStyle(.secondary) }
+                        Spacer() }
+                    HStack {
+                        ForEach([("Proteína", t.p), ("Carbs", t.c), ("Grasa", t.g)], id: \.0) { n, v in
+                            VStack { Text("\(Int(v)) g").font(.headline); Text(n).font(.caption).foregroundStyle(.secondary) }.frame(maxWidth: .infinity)
+                        }
+                    }
+                } footer: { Text("Volumen limpio, ingredientes baratos de súper/mercado en México. Metas del día: 3000 kcal · 160 g P · 410 g C · 80 g G.") }
+                ForEach(TiempoComida.allCases) { tc in
+                    let items = DietaMeta.menu.filter { $0.1 == tc }
+                    if !items.isEmpty {
+                        let m = macros(items)
+                        Section {
+                            ForEach(items.indices, id: \.self) { i in
+                                HStack {
+                                    Text(items[i].0); Spacer()
+                                    Text("\(items[i].2.formatted()) × \(a(items[i].0)?.porcion ?? "")").font(.caption).foregroundStyle(.secondary)
+                                }
+                            }
+                        } header: { Label("\(tc.nombre) · \(Int(m.k)) kcal · \(Int(m.p)) g P", systemImage: tc.icono) }
+                    }
+                }
+                Section {
+                    if yaHayComidas { Text("Ese día ya tiene comidas: se agregan encima.").font(.caption).foregroundStyle(.orange) }
+                    Button("Agregar al día y fijar metas") { DietaMeta.cargar(dia: dia, contexto); cerrar() }
+                        .buttonStyle(.borderedProminent).tint(.green).frame(maxWidth: .infinity)
+                }
+            }
+            .navigationTitle("Menú meta")
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cerrar") { cerrar() } } }
+        }
+    }
+}

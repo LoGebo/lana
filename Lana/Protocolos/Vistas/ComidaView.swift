@@ -17,6 +17,7 @@ struct ComidaView: View {
     @State private var añadiendo: TiempoComida?
     @State private var editando: ComidaLog?
     @State private var metas = false
+    @State private var verMenu = false
 
     private var delDia: [ComidaLog] { logs.filter { $0.dia == dia } }
     private var totales: TotalesDia { TotalesDia(delDia) }
@@ -38,6 +39,7 @@ struct ComidaView: View {
         .sheet(item: $añadiendo) { t in AgregarAlimentoView(tiempo: t, dia: dia) }
         .sheet(item: $editando) { l in EditarPorcionesView(log: l) }
         .sheet(isPresented: $metas) { MetasView() }
+        .sheet(isPresented: $verMenu) { MenuMetaView(dia: dia, yaHayComidas: logs.contains { $0.dia == Calendar.current.startOfDay(for: dia) }) }
     }
 
     private var selectorDia: some View {
@@ -68,7 +70,7 @@ struct ComidaView: View {
                 Spacer()
                 VStack(alignment: .trailing, spacing: 8) {
                     Button { metas = true } label: { Label("Metas", systemImage: "target").font(.subheadline) }
-                    Button { DietaMeta.cargar(dia: dia, contexto) } label: { Label("Menú meta", systemImage: "fork.knife").font(.subheadline) }
+                    Button { verMenu = true } label: { Label("Menú meta", systemImage: "fork.knife").font(.subheadline) }
                         .accessibilityLabel("Cargar menú meta del día")
                 }
             }
