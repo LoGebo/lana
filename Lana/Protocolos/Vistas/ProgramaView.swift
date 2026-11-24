@@ -77,7 +77,7 @@ extension Programa {
         ("Bayesian Cable Curl", 3, "10-12"), ("Overhead Cable Triceps Extension (Bar)", 3, "10-12"),
         ("Cable Rope Hammer Curl", 2, "12-15"), ("Triceps Pressdown (Bar)", 2, "15-20"),
         ("High-Cable Lateral Raise", 3, "12-15"), ("1-Arm 45° Cable Rear Delt Flye", 2, "12-15"),
-        ("Standing Calf Raise", 3, "12-15")]
+        ("Standing Calf Raise", 3, "12-15"), ("Cable Crunch", 2, "10-15")]
 
     /// Reescribe las rutinas "BTS …" con la fase de esa semana y crea los ejercicios que falten.
     @MainActor static func aplicar(semana: Int, fijarInicio: Bool = true, _ contexto: ModelContext) {
@@ -150,7 +150,7 @@ struct TarjetaPrograma: View {
                     UserDefaults.standard.set(0, forKey: Programa.llave)
                     UserDefaults.standard.set(0.0, forKey: Programa.llaveInicio)
                 }.font(.caption)
-                Text("Lun Upper · Mar Lower · Jue Pull · Vie Push · Sáb Legs. Última serie al fallo desde la semana 2. El día de brazos es un extra opcional mío (no es de Nippard).")
+                Text("Lun Upper · Mar Lower · Jue Pull · Vie Push · Sáb Legs. Última serie al fallo desde la semana 2. El día de brazos es un extra opcional mío (no es de Nippard): hazlo el miércoles, 1-2 RIR, y sáltalo si Pull o Upper se te caen.")
                     .font(.caption2).foregroundStyle(.secondary)
             }
         }
