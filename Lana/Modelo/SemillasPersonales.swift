@@ -5,5 +5,5 @@ import SwiftData
 // Este stub no hace nada. Copia tu versión encima y márcala para que git no la suba:
 //   git update-index --skip-worktree Lana/Modelo/SemillasPersonales.swift
 extension Semillas {
-    static func aplicarPersonalizacion(_ contexto: ModelContext) {}
+    @MainActor static func aplicarPersonalizacion(_ contexto: ModelContext) {}
 }
