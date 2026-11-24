@@ -93,3 +93,10 @@ Para ver la app llena sin capturar nada: en Xcode, Edit Scheme → Run → Argum
 - `Lana/Modelo/Finanzas.swift` — todos los cálculos (saldos, patrimonio, rendimientos, proyecciones).
 - `Lana/Modelo/Formato.swift` — pesos mexicanos, fechas, paleta de colores.
 - `Lana/Intents/Atajos.swift` — App Intents para Siri y Atajos.
+
+## Datos personales y contenido que no se publica
+
+- `Lana/Modelo/SemillasPersonales.swift`: tus saldos, tasas e ingresos reales. En git es un stub vacío;
+  pon tu versión y márcala con `git update-index --skip-worktree Lana/Modelo/SemillasPersonales.swift`.
+- `Lana/Protocolos/Modelo/ProgramaBTS.swift`: el programa de entrenamiento de pago (Jeff Nippard) no se publica.
+  Con el stub el módulo de programa queda vacío y las pruebas que lo necesitan se saltan.
